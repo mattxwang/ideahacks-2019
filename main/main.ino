@@ -1,7 +1,7 @@
 #include <EEPROM.h>
 #include"rfid.h"
 #include <Servo.h>
-//#include <CurieBLE.h>
+#include <CurieBLE.h>
 
 int addr; // eeprom address
 
@@ -13,15 +13,13 @@ int pos = 0;    // variable to store the servo position
 
 int lockState;
 int numValid;
+//String password = "enginefars";
 
-/*
 BLEPeripheral blePeripheral; // create peripheral instance
-BLEService ledService("19B10010-E8F2-537E-4F6C-D104768A1214"); // create service
-BLECharCharacteristic ledCharacteristic("19B10011-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
-BLECharCharacteristic buttonCharacteristic("19B10012-E8F2-537E-4F6C-D104768A1214", BLERead | BLENotify); // allows remote device to get notifications
-*/
+BLEService lockService("19B10010-E8F2-537E-4F6C-D104768A1214"); // create service
+BLECharCharacteristic lockCharacteristic("19B10011-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
+//BLECharCharacteristic passwordCharacteristic("19B10012-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
-// the setup function runs once when you press reset or power the board
 void setup() {
   Serial.begin(9600);
   delay(2000);
@@ -47,20 +45,20 @@ void setup() {
   rfid.init();
   
   // SERVO
-  lockServo.attach(9);
-  lockServo.write(90);
+  lockServo.attach(8);
+  //lockServo.write(90);
   
   // BLUETOOTH
-  /*
-  blePeripheral.setLocalName("ButtonLED");
-  blePeripheral.setAdvertisedServiceUuid(ledService.uuid());
-  blePeripheral.addAttribute(ledService);
-  blePeripheral.addAttribute(ledCharacteristic);
-  blePeripheral.addAttribute(buttonCharacteristic);
-  ledCharacteristic.setValue(0);
-  buttonCharacteristic.setValue(0);
+
+  blePeripheral.setLocalName("EFSmartLock");
+  blePeripheral.setAdvertisedServiceUuid(lockService.uuid());
+  blePeripheral.addAttribute(lockService);
+  blePeripheral.addAttribute(lockCharacteristic);
+  //blePeripheral.addAttribute(passwordCharacteristic);
+  lockCharacteristic.setValue(lockState);
+  //passwordCharacteristic.setValue("stop snooping!");
   blePeripheral.begin();
-  */
+  
   digitalWrite(LED_BUILTIN, HIGH);
   Serial.println("Done setup!");
 }
@@ -84,9 +82,15 @@ void setupEEPROM(){
 
 void unlock(){
   Serial.println("Unlocking");
-  lockServo.write(180);
+  for (pos = 0; pos <= 90; pos += 1) {
+    lockServo.write(pos);
+    delay(15);
+  }
+  /*
+   * lockServo.write(180);
   delay(1000);
   lockServo.write(90);
+  */
   lockState = 0;
   EEPROM.update(0, lockState);
   Serial.println("Done unlocking!");
@@ -94,9 +98,15 @@ void unlock(){
 
 void lock(){
   Serial.println("Locking");
+  for (pos = 90; pos >= 0; pos -= 1) {
+    lockServo.write(pos);
+    delay(15);
+  }
+  /*
   lockServo.write(0);
   delay(1000);
   lockServo.write(90);
+  */
   lockState = 1;
   EEPROM.update(0,lockState);
   Serial.println("Done locking!");
@@ -105,6 +115,12 @@ void lock(){
 void loop() {
   uchar status;
   uchar str[MAX_LEN];
+
+  blePeripheral.poll();
+  if (lockCharacteristic.value() != lockState) {
+    lockCharacteristic.setValue(lockState);
+  }
+
   status = rfid.request(PICC_REQIDL, str);
   if (status != MI_OK)
   {
@@ -145,5 +161,5 @@ void loop() {
   }
   
   delay(500);
-  rfid.halt(); //command the card into sleep mode 
+  rfid.halt();
 }

@@ -8,13 +8,32 @@ We're still in progress on this project, so get back to us in a bit!
 
 ## Project Breakdown
 
-The `main` folder contains `main.ino`, the main program that controls our lock and responds to RFID signals, and the file that is supposed to ship with the product. As it functions currently, the correct RFID values that unlock the lock are stored in the EEPROM - which in turn is manipulated by `memory_management.ino`.
+The `main` folder contains `main.ino`, the main program that controls our lock and responds to RFID signals, and the file that is supposed to ship with the product. As it functions currently, the correct RFID values that unlock the lock are stored in the EEPROM - which in turn can be manipulated by `memory_management.ino`. In addition, it creates a `BLEPeripheral` that tells any Bluetooth LE device that connects to the Arduino on the status of the lock.
 
 The `utilities` folder contains two files, `getId.ino` and `memory_management.ino`, which are designed to help developers use the application.
 * `getId.ino` outputs the ID of any RFID device placed on the RFID reader, which is useful for determing the IDs of any RFID objects. We slightly modified the provided `getId.ino` from [Sunfounder](http://wiki.sunfounder.cc/index.php?title=Mifare_RC522_Module_RFID_Reader).
 * `memory_management.ino` contains a set of utility functions that allow the user to easily manipulate the EEPROM onboard the device.
 
 The `lib` folder contains several library files for the RFID board; **they must be copied into `Arduino/libraries` directory for our code to work properly**. We modified the provided libraries provided from [Sunfounder](http://wiki.sunfounder.cc/index.php?title=Mifare_RC522_Module_RFID_Reader), as they caused compilation errors with our Arduino board.
+
+## Arduino Setup
+
+We used an Arduino 101 (with Bluetooth capability) and a Sunfounder RFID-RC522 reader.
+
+|  Input Pin  | Arduino 101 |
+| ----------- | ----------- |
+| Mtr GND     | GND |
+| Mtr Power   | 5V |
+| Mtr Digital | Digital 8 |
+| RFID VCC    | 3.3V |
+| RFID RST    | Digital 2 |
+| RFID GND    | GND |
+| RFID MISO   | Digital 3 |
+| RFID MOSI   | Digital 4 |
+| RFID SCK    | Digital 5 |
+| RFID NSS    | Digital 6 |
+| RFID IRQ    | Digital 7 |
+
 
 ## EEPROM Allocation
 
