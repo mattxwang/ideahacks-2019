@@ -1,12 +1,12 @@
 #include "RFID.h"
-#include <Arduino.h>  
+#include <Arduino.h>
 //#include "softspi.h"
 #include <LiquidCrystal_I2C.h>
- 
+
 LiquidCrystal_I2C LCD(0x27,16,2);
 SOFTSPI softSpi;
 
-  
+
 void RFID::begin(uchar csnPin, uchar sckPin, uchar mosiPin, uchar misoPin, uchar chipSelectPin, uchar NRSTPD)
 {
   softSpi.begin(csnPin, sckPin, mosiPin, misoPin);
@@ -43,7 +43,7 @@ void RFID::showCardID(uchar *id)
 void RFID::showCardType(uchar* type)
 {
     Serial.print("Card type: ");
-    if(type[0]==0x04&&type[1]==0x00) 
+    if(type[0]==0x04&&type[1]==0x00)
         Serial.println("MFOne-S50");
     else if(type[0]==0x02&&type[1]==0x00)
         Serial.println("MFOne-S70");
@@ -67,9 +67,9 @@ void RFID::writeTo(uchar addr, uchar val)
     digitalWrite(_chipSelectPin, LOW);
 
     //address format：0XXXXXX0
-    softSpi.writeByte((addr<<1)&0x7E); 
+    softSpi.writeByte((addr<<1)&0x7E);
     softSpi.writeByte(val);
-    
+
     digitalWrite(_chipSelectPin, HIGH);
 }
 /**********************************************************
@@ -85,12 +85,12 @@ uchar RFID::readFrom(uchar addr)
     digitalWrite(_chipSelectPin, LOW);
 
     //address format：1XXXXXX0
-    softSpi.writeByte(((addr<<1)&0x7E) | 0x80); 
+    softSpi.writeByte(((addr<<1)&0x7E) | 0x80);
     val = softSpi.SPI_RW(0x00);
-    
+
     digitalWrite(_chipSelectPin, HIGH);
-    
-    return val; 
+
+    return val;
 }
 /**********************************************************
  * Function：SetBitMask
@@ -98,7 +98,7 @@ uchar RFID::readFrom(uchar addr)
  * Input parameter：reg--register address;mask--value
  * Return：null
  **********************************************************/
-void RFID::setBitMask(uchar reg, uchar mask) 
+void RFID::setBitMask(uchar reg, uchar mask)
 {
     uchar tmp;
     tmp = readFrom(reg);
@@ -110,7 +110,7 @@ void RFID::setBitMask(uchar reg, uchar mask)
  * Input parameter：reg--register address;mask--value
  * Return：null
  **********************************************************/
-void RFID::clearBitMask(uchar reg, uchar mask) 
+void RFID::clearBitMask(uchar reg, uchar mask)
 {
     uchar tmp;
     tmp = readFrom(reg);
@@ -164,13 +164,13 @@ void RFID::init(void)
     digitalWrite(_NRSTPD,HIGH);
 
     reset();
-         
+
     //Timer: TPrescaler*TreloadVal/6.78MHz = 24ms
     writeTo(TModeReg, 0x8D); //Tauto=1; f(Timer) = 6.78MHz/TPreScaler
     writeTo(TPrescalerReg, 0x3E); //TModeReg[3..0] + TPrescalerReg
-    writeTo(TReloadRegL, 30); 
+    writeTo(TReloadRegL, 30);
     writeTo(TReloadRegH, 0);
-    
+
     writeTo(TxAutoReg, 0x40); //100%ASK
     writeTo(ModeReg, 0x3D); //CRC initilizate value 0x6363 ???
 
@@ -194,19 +194,19 @@ void RFID::init(void)
  */
 uchar RFID::request(uchar reqMode, uchar *TagType)
 {
-    uchar status; 
-    uint backBits; //the data bits that received
+    uchar status;
+    int backBits; //the data bits that received
 
     writeTo(BitFramingReg, 0x07); //TxLastBists = BitFramingReg[2..0] ???
-    
+
     TagType[0] = reqMode;
     status = toCard(PCD_TRANSCEIVE, TagType, 1, TagType, &backBits);
 
     if ((status != MI_OK) || (backBits != 0x10))
-    { 
+    {
         status = MI_ERR;
     }
-   
+
     return status;
 }
 /*
@@ -214,19 +214,19 @@ uchar RFID::request(uchar reqMode, uchar *TagType)
  * Description：communicate between RC522 and ISO14443
  * Input parameter：command--MF522 command bits
  * sendData--send data to card via rc522
- * sendLen--send data length 
+ * sendLen--send data length
  * backData--the return data from card
  * backLen--the length of return data
  * return：return MI_OK if successed
  */
-uchar RFID::toCard(uchar command, uchar *sendData, uchar sendLen, uchar *backData, uint *backLen)
+uchar RFID::toCard(uchar command, uchar *sendData, uchar sendLen, uchar *backData, int *backLen)
 {
     uchar status = MI_ERR;
     uchar irqEn = 0x00;
     uchar waitIRq = 0x00;
     uchar lastBits;
     uchar n;
-    uint i;
+    int i;
 
     switch (command)
     {
@@ -245,29 +245,29 @@ uchar RFID::toCard(uchar command, uchar *sendData, uchar sendLen, uchar *backDat
         default:
             break;
     }
-   
+
     writeTo(CommIEnReg, irqEn|0x80); //Allow interruption
     clearBitMask(CommIrqReg, 0x80); //Clear all the interrupt bits
     setBitMask(FIFOLevelReg, 0x80); //FlushBuffer=1, FIFO initilizate
-    
+
     writeTo(CommandReg, PCD_IDLE); //NO action;cancel current command ???
 
     //write data into FIFO
     for (i=0; i<sendLen; i++)
-    { 
-        writeTo(FIFODataReg, sendData[i]); 
+    {
+        writeTo(FIFODataReg, sendData[i]);
     }
 
     //procceed it
     writeTo(CommandReg, command);
     if (command == PCD_TRANSCEIVE)
-    { 
-        setBitMask(BitFramingReg, 0x80); //StartSend=1,transmission of data starts 
-    } 
-    
+    {
+        setBitMask(BitFramingReg, 0x80); //StartSend=1,transmission of data starts
+    }
+
     //waite receive data is finished
     i = 2000; //i should adjust according the clock, the maxium the waiting time should be 25 ms???
-    do 
+    do
     {
         //CommIrqReg[7..0]
         //Set1 TxIRq RxIRq IdleIRq HiAlerIRq LoAlertIRq ErrIRq TimerIRq
@@ -277,61 +277,61 @@ uchar RFID::toCard(uchar command, uchar *sendData, uchar sendLen, uchar *backDat
     while ((i!=0) && !(n&0x01) && !(n&waitIRq));
 
     clearBitMask(BitFramingReg, 0x80); //StartSend=0
-    
+
     if (i != 0)
-    { 
+    {
         if(!(readFrom(ErrorReg) & 0x1B)) //BufferOvfl Collerr CRCErr ProtecolErr
         {
             status = MI_OK;
             if (n & irqEn & 0x01)
-            { 
-                status = MI_NOTAGERR; //?? 
+            {
+                status = MI_NOTAGERR; //??
             }
-            
+
             if (command == PCD_TRANSCEIVE)
             {
                 n = readFrom(FIFOLevelReg);
                 lastBits = readFrom(ControlReg) & 0x07;
                 if (lastBits)
-                { 
-                    *backLen = (n-1)*8 + lastBits; 
+                {
+                    *backLen = (n-1)*8 + lastBits;
                 }
                 else
-                { 
-                    *backLen = n*8; 
+                {
+                    *backLen = n*8;
                 }
-                
+
                 if (n == 0)
-                { 
-                    n = 1; 
+                {
+                    n = 1;
                 }
                 if (n > MAX_LEN)
-                { 
-                    n = MAX_LEN; 
+                {
+                    n = MAX_LEN;
                 }
-                
+
                 //read the data from FIFO
                 for (i=0; i<n; i++)
-                { 
-                    backData[i] = readFrom(FIFODataReg); 
+                {
+                    backData[i] = readFrom(FIFODataReg);
                 }
             }
         }
         else
-        { 
-            status = MI_ERR; 
+        {
+            status = MI_ERR;
         }
-        
+
     }
-    
+
     //SetBitMask(ControlReg,0x80); //timer stops
-    //Write_MFRC522(CommandReg, PCD_IDLE); 
+    //Write_MFRC522(CommandReg, PCD_IDLE);
 
     return status;
 }
 /*
  * Function：MFRC522_Anticoll
- * Description：Prevent conflict, read the card serial number 
+ * Description：Prevent conflict, read the card serial number
  * Input parameter：serNum--return the 4 bytes card serial number, the 5th byte is recheck byte
  * return：return MI_OK if successed
  */
@@ -340,12 +340,12 @@ uchar RFID::anticoll(uchar *serNum)
     uchar status;
     uchar i;
     uchar serNumCheck=0;
-    uint unLen;
-    
+    int unLen;
+
     //ClearBitMask(Status2Reg, 0x08); //strSensclear
     //ClearBitMask(CollReg,0x80); //ValuesAfterColl
     writeTo(BitFramingReg, 0x00); //TxLastBists = BitFramingReg[2..0]
- 
+
     serNum[0] = PICC_ANTICOLL;
     serNum[1] = 0x20;
     status = toCard(PCD_TRANSCEIVE, serNum, 2, serNum, &unLen);
@@ -354,12 +354,12 @@ uchar RFID::anticoll(uchar *serNum)
     {
         //Verify card serial number
         for (i=0; i<4; i++)
-        { 
+        {
             serNumCheck ^= serNum[i];
         }
         if (serNumCheck != serNum[i])
-        { 
-            status = MI_ERR; 
+        {
+            status = MI_ERR;
         }
     }
 
@@ -381,16 +381,16 @@ void RFID::calulateCRC(uchar *pIndata, uchar len, uchar *pOutData)
     setBitMask(FIFOLevelReg, 0x80); //Clear FIFO pointer
     //Write_MFRC522(CommandReg, PCD_IDLE);
 
-    //Write data into FIFO 
+    //Write data into FIFO
     for (i=0; i<len; i++)
-    { 
-        writeTo(FIFODataReg, *(pIndata+i)); 
+    {
+        writeTo(FIFODataReg, *(pIndata+i));
     }
     writeTo(CommandReg, PCD_CALCCRC);
 
     //waite CRC caculation to finish
     i = 0xFF;
-    do 
+    do
     {
         n = readFrom(DivIrqReg);
         i--;
@@ -410,35 +410,35 @@ void RFID::calulateCRC(uchar *pIndata, uchar len, uchar *pOutData)
 uchar RFID::write(uchar blockAddr, uchar *writeData)
 {
     uchar status;
-    uint recvBits;
+    int recvBits;
     uchar i;
-    uchar buff[18]; 
-    
+    uchar buff[18];
+
     buff[0] = PICC_WRITE;
     buff[1] = blockAddr;
     calulateCRC(buff, 2, &buff[2]);
     status = toCard(PCD_TRANSCEIVE, buff, 4, buff, &recvBits);
 
     if ((status != MI_OK) || (recvBits != 4) || ((buff[0] & 0x0F) != 0x0A))
-    { 
-        status = MI_ERR; 
+    {
+        status = MI_ERR;
     }
-        
+
     if (status == MI_OK)
     {
         for (i=0; i<16; i++) //Write 16 bytes data into FIFO
-        { 
-            buff[i] = *(writeData+i); 
+        {
+            buff[i] = *(writeData+i);
         }
         calulateCRC(buff, 16, &buff[16]);
         status = toCard(PCD_TRANSCEIVE, buff, 18, buff, &recvBits);
-        
+
         if ((status != MI_OK) || (recvBits != 4) || ((buff[0] & 0x0F) != 0x0A))
-        { 
-            status = MI_ERR; 
+        {
+            status = MI_ERR;
         }
     }
-    
+
     return status;
 }
 /*
@@ -450,12 +450,12 @@ uchar RFID::write(uchar blockAddr, uchar *writeData)
 void RFID::halt(void)
 {
     uchar status;
-    uint unLen;
-    uchar buff[4]; 
+    int unLen;
+    uchar buff[4];
 
     buff[0] = PICC_HALT;
     buff[1] = 0;
     calulateCRC(buff, 2, &buff[2]);
- 
+
     status = toCard(PCD_TRANSCEIVE, buff, 4, buff,&unLen);
 }

@@ -2,7 +2,7 @@
 #define __SOFTSPI_H
 
 #define uchar unsigned char
-#define uint  unsigned int
+//#define uint  unsigned int
 
 class SOFTSPI
 {

@@ -33,7 +33,8 @@ void SOFTSPI::writeByte(uchar dat)
 }
 uchar SOFTSPI::readByte(void)
 {
-  uchar n,dat,bit_t;
+  //uchar n,dat,bit_t;
+  uchar n,dat;
   for(n = 0; n < 8; n ++)
   {
     digitalWrite(_sckPin, LOW);
@@ -53,7 +54,7 @@ uchar SOFTSPI::readByte(void)
 }
 /**************************************************
  * Function: SPI_RW();
- * 
+ *
  * Description:
  * Writes one unsigned char to nRF24L01, and return the unsigned char read
  * from nRF24L01 during write, according to SPI protocol
@@ -83,10 +84,10 @@ unsigned char SOFTSPI::SPI_RW(unsigned char Byte)
 }
 /**************************************************
  * Function: SPI_RW_Reg();
- * 
+ *
  * Description:
  * Writes value 'value' to register 'reg'
-/**************************************************/
+**************************************************/
 unsigned char SOFTSPI::SPI_RW_Reg(unsigned char reg, unsigned char value)
 {
   unsigned char status;
@@ -98,13 +99,12 @@ unsigned char SOFTSPI::SPI_RW_Reg(unsigned char reg, unsigned char value)
 
   return(status);                   // return nRF24L01 status unsigned char
 }
-/**************************************************/
 /**************************************************
  * Function: SPI_Read();
- * 
+ *
  * Description:
  * Read one unsigned char from nRF24L01 register, 'reg'
-/**************************************************/
+**************************************************/
 unsigned char SOFTSPI::SPI_Read(unsigned char reg)
 {
   unsigned char reg_val;
@@ -113,17 +113,16 @@ unsigned char SOFTSPI::SPI_Read(unsigned char reg)
   SPI_RW(reg);                   // Select register to read from..
   reg_val = SPI_RW(0);           // ..then read register value
   digitalWrite(_csnPin, 1);          // CSN high, terminate SPI communication
-  
+
   return(reg_val);               // return register value
 }
-/**************************************************/
 /**************************************************
  * Function: SPI_Read_Buf();
- * 
+ *
  * Description:
  * Reads 'unsigned chars' #of unsigned chars from register 'reg'
  * Typically used to read RX payload, Rx/Tx address
-/**************************************************/
+**************************************************/
 unsigned char SOFTSPI::readToBuf(unsigned char reg, unsigned char *pBuf, unsigned char bytes)
 {
   unsigned char status,i;
@@ -140,14 +139,13 @@ unsigned char SOFTSPI::readToBuf(unsigned char reg, unsigned char *pBuf, unsigne
 
   return(status);                  // return nRF24L01 status unsigned char
 }
-/**************************************************/
 /**************************************************
  * Function: SPI_Write_Buf();
- * 
+ *
  * Description:
  * Writes contents of buffer '*pBuf' to nRF24L01
  * Typically used to write TX payload, Rx/Tx address
-/**************************************************/
+**************************************************/
 unsigned char SOFTSPI::writeFromBuf(unsigned char reg, unsigned char *pBuf, unsigned char bytes)
 {
   unsigned char status,i;
@@ -161,5 +159,3 @@ unsigned char SOFTSPI::writeFromBuf(unsigned char reg, unsigned char *pBuf, unsi
   digitalWrite(_csnPin, 1);                   // Set CSN high again
   return status;                  // return nRF24L01 status unsigned char
 }
-
-
