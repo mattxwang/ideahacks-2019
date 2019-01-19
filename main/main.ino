@@ -26,7 +26,7 @@ void setup() {
   Serial.begin(9600);
   delay(2000);
   int scode = EEPROM.read(0);
-  Serial.print("Starting code ");
+  Serial.print("Starting Lock State: ");
   Serial.print(scode);
   Serial.println();
   //setupEEPROM();
@@ -34,7 +34,7 @@ void setup() {
     setupEEPROM();
   }
   numValid = EEPROM.read(1);
-  Serial.print("Valid Combinations ");
+  Serial.print("Valid Combinations: ");
   Serial.print(numValid);
   Serial.println();
   lockState = scode;
@@ -61,6 +61,7 @@ void setup() {
   buttonCharacteristic.setValue(0);
   blePeripheral.begin();
   */
+  digitalWrite(LED_BUILTIN, HIGH);
   Serial.println("Done setup!");
 }
 
@@ -102,7 +103,6 @@ void lock(){
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);
   uchar status;
   uchar str[MAX_LEN];
   status = rfid.request(PICC_REQIDL, str);
