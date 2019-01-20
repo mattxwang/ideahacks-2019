@@ -3,6 +3,9 @@
 #include <Servo.h>
 #include <CurieBLE.h>
 
+//uncomment this for dev mode
+//#define DEVMODE 1
+
 int addr; // eeprom address
 
 RFID rfid; // rfid object
@@ -33,20 +36,26 @@ BLECharCharacteristic lockCharacteristic("19B10011-E8F2-537E-4F6C-D104768A1214",
 BLEIntCharacteristic passwordCharacteristic("19B10012-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 void setup() {
+  #if defined(DEVMODE)
   Serial.begin(9600);
   delay(2000);
+  #endif
   int scode = EEPROM.read(0);
+  #if defined(DEVMODE)
   Serial.print("Starting Lock State: ");
   Serial.print(scode);
   Serial.println();
   //setupEEPROM();
+  #endif
   if (scode != 0 && scode != 1){
     setupEEPROM();
   }
   numValid = EEPROM.read(1);
+  #if defined(DEVMODE)
   Serial.print("Valid Combinations: ");
   Serial.print(numValid);
   Serial.println();
+  #endif
   lockState = scode;
 
   pinMode(LED_BUILTIN, OUTPUT);
@@ -89,11 +98,15 @@ void setup() {
   */
   
   digitalWrite(LED_BUILTIN, HIGH);
+  #if defined(DEVMODE)
   Serial.println("Done setup!");
+  #endif
 }
 
 void setupEEPROM(){
+  #if defined(DEVMODE)
   Serial.println("Setting up EEPROM");
+  #endif
   EEPROM.update(0, 1); // 0 is unlocked, 1 is locked
   EEPROM.update(1, 2); // num of valid combo blocks
   // Combo block 1 - badge
@@ -106,11 +119,15 @@ void setupEEPROM(){
   EEPROM.update(9, 0x88);
   EEPROM.update(10, 0x78);
   EEPROM.update(11, 0x89);
+  #if defined(DEVMODE)
   Serial.println("Done setting up EEPROM");
+  #endif
 }
 
 void appendRfidString(unsigned char c1,unsigned char c2,unsigned char c3,unsigned char c4){
+  #if defined(DEVMODE)
   Serial.println("Appending");
+  #endif
   if (numValid < 255){
     int loc = 4*(numValid+1);
     EEPROM.update(loc  , c1);
@@ -119,23 +136,35 @@ void appendRfidString(unsigned char c1,unsigned char c2,unsigned char c3,unsigne
     EEPROM.update(loc+3, c4);
     numValid++;
     EEPROM.update(1, numValid);
+    #if defined(DEVMODE)
     Serial.println("Inserting completed!");
+    #endif
   }
   else{
+    #if defined(DEVMODE)
     Serial.println("Max lock # reached");
+    #endif
+    for (int i = 0; i < 10; i++){
+      digitalWrite(redPin, HIGH);
+      delay(50);
+      digitalWrite(redPin, LOW);
+      delay(50);
+    }
   }
 }
 
 void unlock(){
   if (lockState == 1){
+    #if defined(DEVMODE)
     Serial.println("Unlocking");
+    #endif
     
     for (pos = 0; pos <= 90; pos += 1) {
       lockServo.write(pos);
       delay(15);
     }
     /*
-     * lockServo.write(180);
+    lockServo.write(180);
     delay(1000);
     lockServo.write(90);
     */
@@ -144,12 +173,16 @@ void unlock(){
     digitalWrite(redPin, LOW);
     digitalWrite(greenPin, HIGH);
   }
+  #if defined(DEVMODE)
   Serial.println("Done unlocking!");
+  #endif
 }
 
 void lock(){
   if (lockState == 0){
+    #if defined(DEVMODE)
     Serial.println("Locking");
+    #endif
     for (pos = 90; pos >= 0; pos -= 1) {
       lockServo.write(pos);
       delay(15);
@@ -164,7 +197,9 @@ void lock(){
     digitalWrite(redPin, HIGH);
     digitalWrite(greenPin, LOW);
   }
+  #if defined(DEVMODE)
   Serial.println("Done locking!");
+  #endif
 }
 
 /*
@@ -190,19 +225,37 @@ void loop() {
   }
   int inputtedPass = passwordCharacteristic.value();
   if (inputtedPass != 0) {
+    #if defined(DEVMODE)
     Serial.print("Password found: ");
     Serial.println(inputtedPass);
+    #endif
     if (inputtedPass == numPass){
+      #if defined(DEVMODE)
       Serial.println("Match found!");
-        if (lockState == 1){
-          unlock();
-        }
-        else{
-          lock();
-        }
+      #endif
+      for (int i = 0; i < 10; i++){
+        digitalWrite(greenPin, HIGH);
+        delay(50);
+        digitalWrite(greenPin, LOW);
+        delay(50);
+      }
+      if (lockState == 1){
+        unlock();
+      }
+      else{
+        lock();
+      }
     }
     else{
+      #if defined(DEVMODE)
       Serial.println("Incorrect Password");
+      #endif
+      for (int i = 0; i < 10; i++){
+        digitalWrite(redPin, HIGH);
+        delay(50);
+        digitalWrite(redPin, LOW);
+        delay(50);
+      }
     }
     passwordCharacteristic.setValue(0);
   }
@@ -245,10 +298,14 @@ void loop() {
   status = rfid.anticoll(str);
 
   if (status == MI_OK) {
+    #if defined(DEVMODE)
     Serial.print("RFID Number: ");
+    #endif
     memcpy(serNum, str, 5);
+    #if defined(DEVMODE)
     rfid.showCardID(serNum);
     Serial.println();
+    #endif
     uchar* id = serNum;
     addr = 4;
     bool found = false;
@@ -259,7 +316,15 @@ void loop() {
         id[2]==EEPROM.read(4*i+addr+2) &&
         id[3]==EEPROM.read(4*i+addr+3)){
           found = true;
+          for (int i = 0; i < 10; i++){
+            digitalWrite(greenPin, HIGH);
+            delay(50);
+            digitalWrite(greenPin, LOW);
+            delay(50);
+          }
+          #if defined(DEVMODE)
           Serial.println("Match found!");
+          #endif
           if (lockState == 1){
             unlock();
           }
@@ -271,12 +336,31 @@ void loop() {
     }
     if (!found){
       if (lockState == 0){
+        #if defined(DEVMODE)
         Serial.println("Creating new valid combination");
+        #endif
+        for (int i = 0; i < 10; i++){
+          digitalWrite(greenPin, HIGH);
+          digitalWrite(redPin, HIGH);
+          delay(50);
+          digitalWrite(greenPin, LOW);
+          digitalWrite(redPin, LOW);
+          delay(50);
+        }
         appendRfidString(id[0],id[1],id[2],id[3]);
         lock();
       }
       else{
+        #if defined(DEVMODE)
         Serial.println("Not correct!");
+        #endif
+        for (int i = 0; i < 10; i++){
+          digitalWrite(redPin, HIGH);
+          delay(50);
+          digitalWrite(redPin, LOW);
+          delay(50);
+        }
+        digitalWrite(redPin, HIGH);
       }
     }
   }
