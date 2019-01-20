@@ -9,8 +9,9 @@ We're still in progress on this project, so get back to us in a bit!
 ## Project Breakdown
 
 The `main` folder contains `main.ino`, the main program that controls our lock and responds to RFID signals, and the file that is supposed to ship with the product. It has a few functions:
-* Controls the servo that locks and unlocks the lock
-* Reads the correct RFID IDs that are allowed to lock and unlock the EEPROM - more information in the EEPROM section
+* Controls the servo that locks and unlocks the lock.
+* Reads the correct RFID IDs that are allowed to lock and unlock the EEPROM - more information in the EEPROM section.
+* Controls the LEDs that show the lock status - unlocked is green, locked is red.
 * Creates a `BLEPeripheral` object to interface with a Bluetooth Low Energy device, with two characteristics:
 	* `lockCharacteristic`, which returns either `0` or `1` for the lock being unlocked or locked, respectively
 	* `passwordCharacteristic`, which receives a numeric password from the user; if it's correct, it toggles the lock. The numeric password is hard-coded into the program: it's currently `1337`
@@ -38,6 +39,8 @@ We used an Arduino 101 (with Bluetooth capability) and a Sunfounder RFID-RC522 r
 | RFID SCK    | Digital 5 |
 | RFID NSS    | Digital 6 |
 | RFID IRQ    | Digital 7 |
+| LED Green   | Digital 9 |
+| LED Red     | Digital 10|
 
 
 ## EEPROM Allocation
