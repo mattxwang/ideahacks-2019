@@ -2,11 +2,13 @@
 
 This is the repository for the project I (Matthew Wang) made with four other teammates (Allison Chen, Ashvin Nagarajan, Jeff Anderson, and Juan Banchs) at [IDEA Hacks 2019](http://www.ideahacks.la).
 
-We made a smart lock, powered by an Arduino 101 and a Sunfounder RFID-RC522 reader. We set up our reader using the [Sunfounder Wiki's experiment tutorial](http://wiki.sunfounder.cc/index.php?title=Mifare_RC522_Module_RFID_Reader).
+Our idea was a smart lock, one that locks and unlocks when an RFID tag (which could be a physical tag, a Bruincard, or an array of other debices) is put near the lock. Compared to other smart locks, ours was designed to be more power and resource efficient, and remains locked even when the lock is tampered with or runs out of battery.
 
-We're still in progress on this project, so get back to us in a bit!
+Our project was powered by an Arduino 101, a Sunfounder RFID-RC522 reader, and a small servo. In addition to those electronic components, our team also used CAD software to design and 3D print our own custom lock housing and mechanism. We also added
 
-## Project Breakdown
+We're still in progress on this project, so we'll keep on updating this README!
+
+## Project Breakdown/File Structure
 
 The `main` folder contains `main.ino`, the main program that controls our lock and responds to RFID signals, and the file that is supposed to ship with the product. It has a few functions:
 * Controls the servo that locks and unlocks the lock.
@@ -25,13 +27,13 @@ The `lib` folder contains several library files for the RFID board; **they must 
 
 ## Arduino Setup
 
-We used an Arduino 101 (with Bluetooth capability) and a Sunfounder RFID-RC522 reader.
+We used an Arduino 101 (with Bluetooth capability) and a Sunfounder RFID-RC522 reader. We set up our reader using the [Sunfounder Wiki's experiment tutorial](http://wiki.sunfounder.cc/index.php?title=Mifare_RC522_Module_RFID_Reader).
 
 |  Input Pin  | Arduino 101 |
 | ----------- | ----------- |
-| Mtr GND     | GND |
-| Mtr Power   | 5V |
-| Mtr Digital | Digital 8 |
+| Servo GND   | GND |
+| Servo Power | 5V |
+| Servo Digital | Digital 8 |
 | RFID VCC    | 3.3V |
 | RFID RST    | Digital 2 |
 | RFID GND    | GND |
@@ -42,6 +44,8 @@ We used an Arduino 101 (with Bluetooth capability) and a Sunfounder RFID-RC522 r
 | RFID IRQ    | Digital 7 |
 | LED Green   | Digital 9 |
 | LED Red     | Digital 10|
+| Power Positive | vin |
+| Power Negative | GND |
 
 
 ## EEPROM Allocation
@@ -55,7 +59,7 @@ The first four bytes of the EEPROM (0-3) are reserved for parameters for the pro
 | 2      | n/a         | Reserved byte for future use. |
 | 3      | n/a         | Reserved byte for future use. |
 
-The rest of the available bytes in the EEPROM are used for RFID ID blocks of four bytes, with each block consisting of four one-byte unsigned characters that represent the value of the RFID ID. Assume `0 <= n <= 255`.
+The rest of the available bytes in the EEPROM are used for RFID ID blocks of four bytes, with each block consisting of four one-byte unsigned characters that represent the value of the RFID ID. Assume `1 <= n <= 255`.
 
 | Byte # | Data Type | Description of Byte |
 | ------ | --------- | ------------------- |
