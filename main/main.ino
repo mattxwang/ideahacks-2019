@@ -94,7 +94,7 @@ void setup() {
 
 void setupEEPROM(){
   Serial.println("Setting up EEPROM");
-  EEPROM.update(0, 0); // 0 is unlocked, 1 is locked
+  EEPROM.update(0, 1); // 0 is unlocked, 1 is locked
   EEPROM.update(1, 2); // num of valid combo blocks
   // Combo block 1 - badge
   EEPROM.update(4, 0xA3);
@@ -107,6 +107,23 @@ void setupEEPROM(){
   EEPROM.update(10, 0x78);
   EEPROM.update(11, 0x89);
   Serial.println("Done setting up EEPROM");
+}
+
+void appendRfidString(unsigned char c1,unsigned char c2,unsigned char c3,unsigned char c4){
+  Serial.println("Appending");
+  if (numValid < 255){
+    int loc = 4*(numValid+1);
+    EEPROM.update(loc  , c1);
+    EEPROM.update(loc+1, c2);
+    EEPROM.update(loc+2, c3);
+    EEPROM.update(loc+3, c4);
+    numValid++;
+    EEPROM.update(1, numValid);
+    Serial.println("Inserting completed!");
+  }
+  else{
+    Serial.println("Max lock # reached");
+  }
 }
 
 void unlock(){
@@ -253,7 +270,14 @@ void loop() {
        }
     }
     if (!found){
-      Serial.println("Not correct!");
+      if (lockState == 0){
+        Serial.println("Creating new valid combination");
+        appendRfidString(id[0],id[1],id[2],id[3]);
+        lock();
+      }
+      else{
+        Serial.println("Not correct!");
+      }
     }
   }
   

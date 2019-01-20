@@ -12,13 +12,14 @@ The `main` folder contains `main.ino`, the main program that controls our lock a
 * Controls the servo that locks and unlocks the lock.
 * Reads the correct RFID IDs that are allowed to lock and unlock the EEPROM - more information in the EEPROM section.
 * Controls the LEDs that show the lock status - unlocked is green, locked is red.
+* Manages the creation of new valid RFIDs - if an RFID object is read in while the lock is unlocked, it writes it to the EEPROM and locks the lock.
 * Creates a `BLEPeripheral` object to interface with a Bluetooth Low Energy device, with two characteristics:
 	* `lockCharacteristic`, which returns either `0` or `1` for the lock being unlocked or locked, respectively
 	* `passwordCharacteristic`, which receives a numeric password from the user; if it's correct, it toggles the lock. The numeric password is hard-coded into the program: it's currently `1337`
 
 The `utilities` folder contains two files, `getId.ino` and `memory_management.ino`, which are designed to help developers use the application.
 * `getId.ino` outputs the ID of any RFID device placed on the RFID reader, which is useful for determing the IDs of any RFID objects. We slightly modified the provided `getId.ino` from [Sunfounder](http://wiki.sunfounder.cc/index.php?title=Mifare_RC522_Module_RFID_Reader).
-* `memory_management.ino` contains a set of utility functions that allow the user to easily manipulate the EEPROM onboard the device. Currently, this is the only way to add "correct" RFID IDs to the lock.
+* `memory_management.ino` contains a set of utility functions that allow the user to easily manipulate the EEPROM onboard the device.
 
 The `lib` folder contains several library files for the RFID board; **they must be copied into `Arduino/libraries` directory for our code to work properly**. We modified the provided libraries provided from [Sunfounder](http://wiki.sunfounder.cc/index.php?title=Mifare_RC522_Module_RFID_Reader), as they caused compilation errors with our Arduino board.
 
@@ -72,5 +73,11 @@ For example, to make the RFID `A34815D3` valid as the first correct RFID, you'd 
 | 6     | `unsigned char` | 0x15 |
 | 7     | `unsigned char` | 0xD3 |
 
+Which would look like this in code:
+
+```cpp
+// memory_management.ino
+insertRfidString(4, 0xA3, 0x48, 0x15, 0xD3);
+```
 
 More details coming soon :)
