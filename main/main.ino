@@ -1,5 +1,5 @@
 #include <EEPROM.h>
-#include"rfid.h"
+#include "rfid.h"
 #include <Servo.h>
 #include <CurieBLE.h>
 
@@ -22,6 +22,9 @@ boolean stringComplete = false;
 */
 
 int numPass = 1337;
+
+int redPin = 10;
+int greenPin = 9;
 
 
 BLEPeripheral blePeripheral; // create peripheral instance
@@ -47,6 +50,8 @@ void setup() {
   lockState = scode;
 
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
   
   // RFID
   rfid.begin(7, 5, 4, 3, 6, 2);//rfid.begin(IRQ_PIN,SCK_PIN,MOSI_PIN,MISO_PIN,NSS_PIN,RST_PIN)
@@ -57,6 +62,12 @@ void setup() {
   lockServo.attach(8);
   if (lockState == 1){
     lockServo.write(0);
+    digitalWrite(redPin, HIGH);
+    digitalWrite(greenPin, LOW);
+  }
+  else{
+    digitalWrite(redPin, LOW);
+    digitalWrite(greenPin, HIGH);
   }
   //lockServo.write(90);
   
@@ -101,6 +112,7 @@ void setupEEPROM(){
 void unlock(){
   if (lockState == 1){
     Serial.println("Unlocking");
+    
     for (pos = 0; pos <= 90; pos += 1) {
       lockServo.write(pos);
       delay(15);
@@ -112,6 +124,8 @@ void unlock(){
     */
     lockState = 0;
     EEPROM.update(0, lockState);
+    digitalWrite(redPin, LOW);
+    digitalWrite(greenPin, HIGH);
   }
   Serial.println("Done unlocking!");
 }
@@ -130,6 +144,8 @@ void lock(){
     */
     lockState = 1;
     EEPROM.update(0,lockState);
+    digitalWrite(redPin, HIGH);
+    digitalWrite(greenPin, LOW);
   }
   Serial.println("Done locking!");
 }
