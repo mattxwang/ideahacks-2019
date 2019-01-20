@@ -1,5 +1,8 @@
 # IDEA Hacks 2019
 
+
+[Watch a demo of the project in action here!](https://twitter.com/malsf21/status/1086905494990540800)
+
 This is the repository for the project I (Matthew Wang) made with four other teammates (Allison Chen, Ashvin Nagarajan, Jeff Anderson, and Juan Banchs) at [IDEA Hacks 2019](http://www.ideahacks.la).
 
 Our idea was a smart lock, one that locks and unlocks when an RFID tag (which could be a physical tag, a Bruincard, or an array of other debices) is put near the lock. Compared to other smart locks, ours was designed to be more power and resource efficient, and remains locked even when the lock is tampered with or runs out of battery.
