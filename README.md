@@ -1,6 +1,6 @@
 # pop 'n lock - IDEA Hacks 2019
 
-![Logo](blob/master/popnlock.png)
+![Logo](popnlock.png)
 
 **pop 'n lock was the winning project at IDEA Hacks 2019!**
 
