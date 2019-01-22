@@ -1,5 +1,8 @@
-# IDEA Hacks 2019
+# pop 'n lock - IDEA Hacks 2019
 
+![Logo](blob/master/popnlock.png)
+
+**pop 'n lock was the winning project at IDEA Hacks 2019!**
 
 [Watch a demo of the project in action here!](https://twitter.com/malsf21/status/1086905494990540800)
 
