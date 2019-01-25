@@ -6,13 +6,13 @@
 
 [Watch a demo of the project in action here!](https://twitter.com/malsf21/status/1086905494990540800)
 
+[Check out our slide deck we used to present in the finals!](https://docs.google.com/presentation/d/1d5BIQ5dW1tAUO1HwoitRVkcqre-7os89AI75l5lS5rY/edit?usp=sharing)
+
 This is the repository for the project I (Matthew Wang) made with four other teammates (Allison Chen, Ashvin Nagarajan, Jeff Anderson, and Juan Banchs) at [IDEA Hacks 2019](http://www.ideahacks.la).
 
-Our idea was a smart lock, one that locks and unlocks when an RFID tag (which could be a physical tag, a Bruincard, or an array of other debices) is put near the lock. Compared to other smart locks, ours was designed to be more power and resource efficient, and remains locked even when the lock is tampered with or runs out of battery.
+Our idea was a smart lock, one that locks and unlocks when an RFID tag (which could be a physical tag, a Bruincard, or an array of other devices) is put near the lock. Compared to other smart locks, ours was designed to be more power and resource efficient, be more tamper-proof (i.e. the lock mechanism cannot be shimmed and the lock stays locked when out of power), and be more convenient (no app required).
 
-Our project was powered by an Arduino 101, a Sunfounder RFID-RC522 reader, and a small servo. In addition to those electronic components, our team also used CAD software to design and 3D print our own custom lock housing and mechanism. We also added
-
-We're still in progress on this project, so we'll keep on updating this README!
+Our project was powered by an Arduino 101, a Sunfounder RFID-RC522 reader, and a small servo. In addition to those electronic components, our team also used CAD software to design and 3D print our own custom lock housing and mechanism. We also added LEDs to indicate the status of the lock, as well as a prototype of Bluetooth interaction with the lock (which does include a new vector of attack), possibly for two-factor authentication in the future.
 
 ## Project Breakdown/File Structure
 
@@ -90,4 +90,6 @@ Which would look like this in code:
 insertRfidString(4, 0xA3, 0x48, 0x15, 0xD3);
 ```
 
-More details coming soon :)
+## Lock Mechanism
+
+We used a ball-bearing lock mechanism, which as the advantage of having the entire locking mechanism within the lock body - therefore, there's no physical lock to pick! [Our slide deck has a good illustration of how this worked.](https://docs.google.com/presentation/d/1d5BIQ5dW1tAUO1HwoitRVkcqre-7os89AI75l5lS5rY/edit?usp=sharing)
