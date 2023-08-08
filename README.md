@@ -4,9 +4,7 @@
 
 **pop 'n lock was the winning project at IDEA Hacks 2019!**
 
-[Watch a demo of the project in action here!](https://twitter.com/malsf21/status/1086905494990540800)
-
-[Check out our slide deck we used to present in the finals!](https://docs.google.com/presentation/d/1d5BIQ5dW1tAUO1HwoitRVkcqre-7os89AI75l5lS5rY/edit?usp=sharing)
+*Note (2023)*: some of the old documentation links have been lost to link rot. I've done my best to upload various videos (the `.mp4` files in this repository) and a PDF copy of our slides. This project should be relatively replicable given solely the materials in this repository, though I believe this particular approach no longer works for Bruin Cards (which have since updated their security protocol). Thank you to Juan Banchs and Jeff Anderson for animating the original videos in 2019.
 
 This is the repository for the project I (Matthew Wang) made with four other teammates (Allison Chen, Ashvin Nagarajan, Jeff Anderson, and Juan Banchs) at [IDEA Hacks 2019](http://www.ideahacks.la).
 
@@ -92,4 +90,4 @@ insertRfidString(4, 0xA3, 0x48, 0x15, 0xD3);
 
 ## Lock Mechanism
 
-We used a ball-bearing lock mechanism, which as the advantage of having the entire locking mechanism within the lock body - therefore, there's no physical lock to pick! [Our slide deck has a good illustration of how this worked.](https://docs.google.com/presentation/d/1d5BIQ5dW1tAUO1HwoitRVkcqre-7os89AI75l5lS5rY/edit?usp=sharing)
+We used a ball-bearing lock mechanism, which as the advantage of having the entire locking mechanism within the lock body - therefore, there's no physical lock to pick! Our slide deck had a good illustration of how this worked; the videos in this repository are the best aid I could find.
